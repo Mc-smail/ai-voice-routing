@@ -8,7 +8,9 @@ KI-gestützter n8n-Prototyp zur Zuordnung von Kundenanfragen. Ein Webhook nimmt 
 
 ```mermaid
 flowchart TD
-    A["POST /webhook/vapi-router"] --> B["Uhrzeit: Europe/Berlin"]
+    A["POST an Webhook vapi-router"] --> V{"Transkript gültig?"}
+    V -->|Nein| X["HTTP 400 mit JSON"]
+    V -->|Ja| B["Uhrzeit: Europe/Berlin"]
     B --> C{"Mo–Fr, 09:00 bis vor 18:00?"}
     C -->|Nein| D["JSON-Antwort: geschlossen"]
     C -->|Ja| E["OpenAI analysiert den Text"]
@@ -30,7 +32,7 @@ flowchart TD
 
 | Bereich | Verhalten im Workflow |
 | --- | --- |
-| Eingang | POST-Webhook mit `transcript` im JSON-Body |
+| Eingang | POST-Webhook mit nicht leerem `transcript` im JSON-Body, maximal 8000 UTF-16-Codeeinheiten |
 | Geschäftszeiten | Montag bis Freitag, 09:00 bis vor 18:00 Uhr; Zeitzone Europe/Berlin mit Sommerzeit |
 | KI-Analyse | OpenAI-Knoten, im Export mit `gpt-4o-mini` konfiguriert |
 | Routing | Technik, Termin, Bewerbung, Vertrieb oder Support |
@@ -40,7 +42,7 @@ flowchart TD
 
 Bewerbungsbegriffe werden an Unicode-Wortgrenzen erkannt. So bleibt „Ihre Rechnung“ beim Support, während „HR-Abteilung“ zur Bewerbung gehört; „bestellen“ wird dem Vertrieb zugeordnet. Die Reihenfolge der Routing-Zweige bleibt bestehen.
 
-Der Export enthält **18 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
+Der Export enthält **21 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
 
 ## In n8n starten
 
@@ -50,10 +52,10 @@ Der Export enthält **18 Knoten**. Die Antworten liefern Ziele wie `technik_agen
 4. Sende eine JSON-Anfrage. Außerhalb der Geschäftszeiten antwortet der Workflow mit dem Hinweis auf die Öffnungszeiten.
 5. Für den dauerhaften Eingang den Workflow veröffentlichen und die angezeigte Production-URL verwenden.
 
-Lokales Beispiel für eine n8n-Instanz auf Port 5678, während der Webhook im Testmodus wartet:
+Setze die in n8n angezeigte Test-URL ein und sende die Anfrage, während der Webhook im Testmodus wartet.
 
 ```bash
-curl --request POST 'http://localhost:5678/webhook-test/vapi-router' \
+curl --request POST 'TEST_URL_AUS_N8N' \
   --header 'Content-Type: application/json' \
   --data '{"transcript":"Mein Router funktioniert nicht."}'
 ```
@@ -68,6 +70,8 @@ Beispielantwort während der Geschäftszeiten bei Zuordnung zur Technik:
   "transfer_target": "technik_agent"
 }
 ```
+
+Eine ungültige Eingabe erhält **HTTP 400** mit `status: invalid_request` und einem Hinweis zum Feld `transcript`. Die Prüfung läuft vor der Geschäftszeitprüfung und dem Modellaufruf.
 
 ### Geschäftszeiten gezielt testen
 

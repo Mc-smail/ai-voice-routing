@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -800,
+        -1584,
         352
       ],
       "name": "Webhook",
@@ -541,6 +541,99 @@
       ],
       "name": "Date & Time Berlin",
       "id": "a00d0089-6746-53cc-a0d4-b95e7e06a89f"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst transcript = input.body && Object.hasOwn(input.body, 'transcript')\n  ? input.body.transcript\n  : input.transcript;\n\nconst validTranscript = typeof transcript === 'string'\n  && transcript.length <= 8000\n  && transcript.trim().length > 0;\n\nreturn [{ json: { ...input, validTranscript } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        352
+      ],
+      "name": "Validate Transcript",
+      "id": "2388b93d-aff9-4bcc-aac6-f5158c44b9e1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "d832a126-b1b8-4ca1-a56f-314aae4bf287",
+                    "leftValue": "={{ $json.validTranscript }}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f6dbccb5-cd4f-4b48-9b1c-3cdc21e4d7f1",
+                    "leftValue": "={{ $json.validTranscript }}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -1056,
+        352
+      ],
+      "name": "Transcript Valid?",
+      "id": "63133d0c-0b13-43ba-8ee2-bbf8a41deed4"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"invalid_request\", \"message\": \"transcript muss ein nicht leerer Text mit höchstens 8000 UTF-16-Codeeinheiten sein.\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -816,
+        608
+      ],
+      "name": "Invalid Transcript",
+      "id": "070e6416-8c4f-4342-a2fd-18ac42dc6759"
     }
   ],
   "connections": {
@@ -548,7 +641,7 @@
       "main": [
         [
           {
-            "node": "Date & Time Berlin",
+            "node": "Validate Transcript",
             "type": "main",
             "index": 0
           }
@@ -739,6 +832,35 @@
     "support2": {
       "main": [
         []
+      ]
+    },
+    "Validate Transcript": {
+      "main": [
+        [
+          {
+            "node": "Transcript Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcript Valid?": {
+      "main": [
+        [
+          {
+            "node": "Date & Time Berlin",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Invalid Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },

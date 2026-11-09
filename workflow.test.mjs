@@ -46,6 +46,39 @@ test('public export has no credentials, pinned data or active workflow', () => {
   assert.doesNotMatch(JSON.stringify(workflow), /\b(?:sk-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,})\b/);
 });
 
+test('webhook validates transcript before the opening hours and model branches', async () => {
+  const webhook = nodes.get('Webhook');
+  assert.equal(webhook.parameters.responseMode, 'responseNode');
+  assert.equal(workflow.connections.Webhook.main[0][0].node, 'Validate Transcript');
+  assert.equal(workflow.connections['Validate Transcript'].main[0][0].node, 'Transcript Valid?');
+  const switchRules = nodes.get('Transcript Valid?').parameters.rules.values;
+  const branches = workflow.connections['Transcript Valid?'].main;
+  assert.deepEqual(switchRules.map(rule => {
+    const condition = rule.conditions.conditions[0];
+    assert.equal(condition.leftValue, '={{ $json.validTranscript }}');
+    return condition.operator.operation;
+  }), ['true', 'false']);
+  assert.deepEqual(branches.map(branch => branch[0].node), ['Date & Time Berlin', 'Invalid Transcript']);
+  assert.equal(branches[1].length, 1);
+  const response = nodes.get(branches[1][0].node);
+  assert.equal(response.type, 'n8n-nodes-base.respondToWebhook');
+  assert.equal(response.parameters.options.responseCode, 400);
+  assert.equal(JSON.parse(response.parameters.responseBody).status, 'invalid_request');
+  assert.equal(workflow.connections[response.name], undefined);
+
+  for (const body of [{}, {transcript: null}, {transcript: 42}, {transcript: []},
+    {transcript: ''}, {transcript: '  \n '}, {transcript: 'a'.repeat(8001)}]) {
+    const result = await execute('Validate Transcript', {body, validTranscript: true});
+    assert.equal(result.validTranscript, false);
+  }
+  for (const transcript of ['Ich brauche Hilfe.', '😀'.repeat(4000)]) {
+    const result = await execute('Validate Transcript', {body: {transcript}});
+    assert.equal(result.validTranscript, true);
+    assert.equal(result.body.transcript, transcript);
+  }
+  assert.equal((await execute('Validate Transcript', {transcript: 'Direkte Eingabe'})).validTranscript, true);
+});
+
 test('all code nodes compile without executing their code', () => {
   for (const node of workflow.nodes.filter(node => node.type === 'n8n-nodes-base.code')) {
     assert.doesNotThrow(() => new AsyncFunction('$input', '$node', 'Date', node.parameters.jsCode), node.name);
