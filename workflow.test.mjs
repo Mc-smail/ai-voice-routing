@@ -169,3 +169,21 @@ test('two distinct routing objects are ambiguous and fall back to support', asyn
   const text = JSON.stringify(aiObject) + '\n' + JSON.stringify({...aiObject, kategorie:'technik'});
   assert.equal((await execute('Parse AI JSON', {text})).kategorie, 'support');
 });
+
+
+for (const [transcript, expected] of [
+  ['Können Sie mir Ihre Rechnung erklären?', 'support'],
+  ['Ich möchte etwas bestellen.', 'vertrieb'],
+  ['Ich möchte mit einem Mitarbeiter sprechen.', 'support'],
+  ['Ich möchte mit HR über eine freie Stelle sprechen.', 'bewerbung'],
+  ['Ich möchte zur HR-Abteilung.', 'bewerbung'],
+  ['Haben Sie Stellenangebote?', 'bewerbung'],
+  ['Wo finde ich Ihre Jobangebote?', 'bewerbung'],
+  ['Darf ich mich bei Ihnen bewerben?', 'bewerbung'],
+  ['Was bedeutet äHRlich?', 'support'],
+]) {
+  test(`recruitment keywords respect Unicode word boundaries: ${transcript}`, async () => {
+    const parsed = await execute('Parse AI JSON', {text: '{"kategorie":"support"}'}, transcript);
+    assert.equal(parsed.kategorie, expected);
+  });
+}

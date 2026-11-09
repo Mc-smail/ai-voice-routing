@@ -38,6 +38,8 @@ flowchart TD
 | JSON-Verarbeitung | Liest Modellantworten, Codeblöcke und JSON mit Vorrede; unbrauchbare Kategorien fallen auf Support zurück |
 | Ergebnis | Strukturierte Webhook-Antwort mit Abteilung, Team und logischem Ziel |
 
+Bewerbungsbegriffe werden an Unicode-Wortgrenzen erkannt. So bleibt „Ihre Rechnung“ beim Support, während „HR-Abteilung“ zur Bewerbung gehört; „bestellen“ wird dem Vertrieb zugeordnet. Die Reihenfolge der Routing-Zweige bleibt bestehen.
+
 Der Export enthält **18 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
 
 ## In n8n starten
