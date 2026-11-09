@@ -14,7 +14,8 @@ flowchart TD
     B --> C{"Mo–Fr, 09:00 bis vor 18:00?"}
     C -->|Nein| D["JSON-Antwort: geschlossen"]
     C -->|Ja| E["OpenAI analysiert den Text"]
-    E --> F["JSON lesen und Routing-Felder prüfen"]
+    E -->|API-Fehler oder Zeitüberschreitung| U["HTTP 502 mit JSON"]
+    E -->|Antwort| F["JSON lesen und Routing-Felder prüfen"]
     F --> G{"Abteilung auswählen"}
     G --> H["Technik"]
     G --> I["Termin / Empfang"]
@@ -43,7 +44,7 @@ flowchart TD
 
 Bewerbungsbegriffe werden an Unicode-Wortgrenzen erkannt. So bleibt „Ihre Rechnung“ beim Support, während „HR-Abteilung“ zur Bewerbung gehört; „bestellen“ wird dem Vertrieb zugeordnet. Die Reihenfolge der Routing-Zweige bleibt bestehen.
 
-Der Export enthält **21 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
+Der Export enthält **22 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
 
 ## In n8n starten
 
@@ -73,6 +74,8 @@ Beispielantwort während der Geschäftszeiten bei Zuordnung zur Technik:
 ```
 
 Eine ungültige Eingabe erhält **HTTP 400** mit `status: invalid_request` und einem Hinweis zum Feld `transcript`. Die Prüfung läuft vor der Geschäftszeitprüfung und dem Modellaufruf.
+
+Meldet der OpenAI-Knoten einen API-Fehler oder eine Zeitüberschreitung, antwortet der Webhook mit **HTTP 502**, `status: model_unavailable` und einem Hinweis für einen späteren Versuch. Die Antwort enthält einen festen Meldungstext.
 
 ### Geschäftszeiten gezielt testen
 

@@ -41,7 +41,8 @@
         144
       ],
       "name": "Message a model",
-      "id": "54391ad2-396b-5b4b-b752-7a26781ca5ec"
+      "id": "54391ad2-396b-5b4b-b752-7a26781ca5ec",
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
@@ -634,6 +635,23 @@
       ],
       "name": "Invalid Transcript",
       "id": "070e6416-8c4f-4342-a2fd-18ac42dc6759"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"model_unavailable\", \"message\": \"Die automatische Zuordnung ist gerade nicht verfügbar. Bitte versuchen Sie es später erneut.\"}",
+        "options": {
+          "responseCode": 502
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        576,
+        -80
+      ],
+      "name": "Model Unavailable",
+      "id": "e7430c71-25b0-49c4-9a06-fc6d8ae6caea"
     }
   ],
   "connections": {
@@ -693,6 +711,13 @@
         [
           {
             "node": "Parse AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Model Unavailable",
             "type": "main",
             "index": 0
           }

@@ -79,6 +79,24 @@ test('webhook validates transcript before the opening hours and model branches',
   assert.equal((await execute('Validate Transcript', {transcript: 'Direkte Eingabe'})).validTranscript, true);
 });
 
+test('model failures get a terminal JSON 502 response', () => {
+  const model = nodes.get('Message a model');
+  assert.equal(model.onError, 'continueErrorOutput');
+  const branches = workflow.connections[model.name].main;
+  assert.deepEqual(branches.map(branch => branch.map(edge => edge.node)),
+    [['Parse AI JSON'], ['Model Unavailable']]);
+
+  const response = nodes.get('Model Unavailable');
+  assert.equal(response.type, 'n8n-nodes-base.respondToWebhook');
+  assert.equal(response.parameters.respondWith, 'json');
+  assert.equal(response.parameters.options.responseCode, 502);
+  assert.equal(workflow.connections[response.name], undefined);
+  const body = JSON.parse(response.parameters.responseBody);
+  assert.deepEqual(Object.keys(body).sort(), ['message', 'status']);
+  assert.equal(body.status, 'model_unavailable');
+  assert.match(body.message, /später erneut/);
+});
+
 test('all code nodes compile without executing their code', () => {
   for (const node of workflow.nodes.filter(node => node.type === 'n8n-nodes-base.code')) {
     assert.doesNotThrow(() => new AsyncFunction('$input', '$node', 'Date', node.parameters.jsCode), node.name);
