@@ -1,0 +1,753 @@
+{
+  "name": "AI Voice Routing - Customer Support",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vapi-router",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -800,
+        352
+      ],
+      "name": "Webhook",
+      "id": "c5d0d1c4-65a5-5676-aca9-5dd25e5d4daa"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Analysiere die Kundenanfrage und wähle GENAU EINE Kategorie.\n\nKundenanfrage:\n{{$json[\"transcript\"]}}\n\nKategorien:\n- technik: technische Probleme, Router, Internet, Gerät, Software, Hardware, Fehler\n- termin: Termin buchen, Termin vereinbaren, Rückruf, Kalender, Uhrzeit, Datum\n- bewerbung: Bewerbung, Job, Stelle, Lebenslauf, Praktikum, HR\n- vertrieb: Kaufen, Preis, Angebot, Produkt, Beratung, Verkauf\n- support: Hilfe, Reklamation, allgemeiner Kundendienst, Beschwerde\n\nAntworte NUR als gültiges JSON, ohne Markdown, ohne Erklärung:\n{\"kategorie\":\"technik|termin|bewerbung|vertrieb|support\",\"anliegen\":\"\",\"prioritaet\":\"niedrig|mittel|hoch\",\"aktion\":\"weiterleiten\"}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        144
+      ],
+      "name": "Message a model",
+      "id": "54391ad2-396b-5b4b-b752-7a26781ca5ec"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fixed-technik",
+                    "leftValue": "={{$json[\"kategorie\"]}}",
+                    "rightValue": "technik",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fixed-termin",
+                    "leftValue": "={{$json[\"kategorie\"]}}",
+                    "rightValue": "termin",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fixed-bewerbung",
+                    "leftValue": "={{$json[\"kategorie\"]}}",
+                    "rightValue": "bewerbung",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fixed-vertrieb",
+                    "leftValue": "={{$json[\"kategorie\"]}}",
+                    "rightValue": "vertrieb",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fixed-support",
+                    "leftValue": "={{$json[\"kategorie\"]}}",
+                    "rightValue": "support",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        384
+      ],
+      "name": "Switch",
+      "id": "33402474-16ab-5258-a632-6bedad236d90"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "03791236-6930-4e6d-8be9-cfedebca1e4c",
+              "name": "department",
+              "value": "technik",
+              "type": "string"
+            },
+            {
+              "id": "5f4a8a03-616a-4229-9e60-173585f9600c",
+              "name": "agent_name",
+              "value": "Technik Team",
+              "type": "string"
+            },
+            {
+              "id": "c07e2f64-4018-40a7-a172-54428180c1c2",
+              "name": "transfer_target",
+              "value": "technik_agent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        -160
+      ],
+      "name": "Technik Routing",
+      "id": "64db78dc-aba1-50eb-8851-307c326f1c0b"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "983d8e72-47f7-4212-9a7a-0509b8c5d52e",
+              "name": "department",
+              "value": "termin",
+              "type": "string"
+            },
+            {
+              "id": "992b55ef-d44c-4b95-a109-066e96222da2",
+              "name": "agent_name",
+              "value": "empfang",
+              "type": "string"
+            },
+            {
+              "id": "f1ca0fcf-6816-4e11-a5cb-c7ec4feb2d2b",
+              "name": "transfer_target",
+              "value": "empfang_agent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        688
+      ],
+      "name": "termin",
+      "id": "31e5dd37-15a0-5a3a-a7e3-83a98f95d9bb"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "abf63672-d613-4a64-aa07-b3b0add9e497",
+              "name": "department",
+              "value": "bewerbung",
+              "type": "string"
+            },
+            {
+              "id": "87a72af5-079b-47e1-94d3-806aad7ed5c3",
+              "name": "agent_name",
+              "value": "HR Team",
+              "type": "string"
+            },
+            {
+              "id": "0eff763c-c347-4e55-a637-3e960dac370b",
+              "name": "transfer_target",
+              "value": "hr_agent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        960
+      ],
+      "name": "bewerbung",
+      "id": "ae1bba36-e844-5079-aeca-ae7f68aee01a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f71f4df5-498e-4952-864c-9ec9eec9adc4",
+              "name": "department",
+              "value": "vertrieb",
+              "type": "string"
+            },
+            {
+              "id": "024fadc5-36b8-486d-b943-7cb3d5f64a13",
+              "name": "agent_name",
+              "value": "Sales Team",
+              "type": "string"
+            },
+            {
+              "id": "3f4fccaa-465f-470e-b679-7e1e038a90a5",
+              "name": "transfer_target",
+              "value": "sales_agent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        176
+      ],
+      "name": "vertrieb",
+      "id": "1b579ac7-64f9-5ea6-bfa7-ce331065c204"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3134857d-1e8a-42d4-9f19-00f39787a068",
+              "name": "department",
+              "value": "support",
+              "type": "string"
+            },
+            {
+              "id": "5a4fd719-a26a-48cd-8909-1010c4f85144",
+              "name": "agent_name",
+              "value": "support Team",
+              "type": "string"
+            },
+            {
+              "id": "aa0c6fcf-d4ba-4d60-87b4-5abf2169b5c9",
+              "name": "transfer_target",
+              "value": "support_agent",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        464
+      ],
+      "name": "support",
+      "id": "18e05739-c426-5051-8d63-8c6989f89453"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit unserem HR Team.\",\n  \"department\": \"bewerbung\",\n  \"agent_name\": \"HR Team\",\n  \"transfer_target\": \"hr_agent\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1744,
+        960
+      ],
+      "name": "bewerbung1",
+      "id": "6c5e923b-3260-5d23-8d60-a76aa673f9a9"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit unserem Empfang.\",\n  \"department\": \"termin\",\n  \"agent_name\": \"Empfang\",\n  \"transfer_target\": \"empfang_agent\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1744,
+        688
+      ],
+      "name": "termin1",
+      "id": "c9f97d96-630b-5f7a-87d5-1556fd0b755b"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit dem Support Team.\",\n  \"department\": \"support\",\n  \"agent_name\": \"Support Team\",\n  \"transfer_target\": \"support_agent\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1744,
+        464
+      ],
+      "name": "support2",
+      "id": "23d4f7c6-b036-57d9-9d45-299b0e3ef0ac"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit dem Sales Team.\",\n  \"department\": \"vertrieb\",\n  \"agent_name\": \"Sales Team\",\n  \"transfer_target\": \"sales_agent\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1744,
+        176
+      ],
+      "name": "vertrieb1",
+      "id": "4604e69e-42d4-5d18-b5e6-cd8721f1da1f"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit dem Technik Team.\",\n  \"department\": \"technik\",\n  \"agent_name\": \"Technik Team\",\n  \"transfer_target\": \"technik_agent\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1744,
+        -160
+      ],
+      "name": "technik",
+      "id": "402a64f2-c30e-5711-a36b-9bc6a622008e"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nlet text = '';\n\nif (input.output?.[0]?.content?.[0]?.text) {\n  text = input.output[0].content[0].text;\n} else if (input.output_text) {\n  text = input.output_text;\n} else if (input.text) {\n  text = input.text;\n} else {\n  text = JSON.stringify(input);\n}\n\ntext = String(text).replace(/```json/gi, '').replace(/```/g, '').trim();\n\nlet parsed = {};\ntry {\n  parsed = JSON.parse(text);\n} catch (error) {\n  const match = text.match(/\\{[\\s\\S]*\\}/);\n  if (match) { try { parsed = JSON.parse(match[0]); } catch {} }\n}\n\nif (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) parsed = {};\n\nconst original = String($node['Webhook'].json.body?.transcript || $node['Webhook'].json.transcript || input.transcript || '').toLowerCase();\nlet kategorie = String(parsed.kategorie || '').toLowerCase().trim();\n\n// Strong keyword routing has priority over AI category.\nif (/(termin|vereinbaren|kalender|uhrzeit|datum|rückruf|ruckruf|anruf|appointment)/i.test(original)) {\n  kategorie = 'termin';\n} else if (/(technik|technisch|router|internet|gerät|geraet|software|hardware|fehler|problem|störung|stoerung|defekt)/i.test(original)) {\n  kategorie = 'technik';\n} else if (/(bewerbung|job|stelle|lebenslauf|praktikum|hr|personal|arbeit)/i.test(original)) {\n  kategorie = 'bewerbung';\n} else if (/(preis|angebot|kaufen|produkt|beratung|verkauf|vertrieb|kosten|bestellen)/i.test(original)) {\n  kategorie = 'vertrieb';\n} else if (!['technik','termin','bewerbung','vertrieb','support'].includes(kategorie)) {\n  kategorie = 'support';\n}\n\nreturn [{ json: { ...input, ...parsed, kategorie } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        432
+      ],
+      "name": "Parse AI JSON",
+      "id": "fa78baae-e86b-52df-a876-ce99d78e2697"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst body = input.body || input;\n\n// Öffnungszeiten: Montag-Freitag 09:00-18:00, Wochenende geschlossen\n// Optional nur zum Testen: body.forceOpen = true/false\nconst day = input.current_day;\nconst currentMinutes = input.current_minutes;\nconst openMinutes = 9 * 60;\nconst closeMinutes = 18 * 60;\n\nlet isOpen = day >= 1 && day <= 5 && currentMinutes >= openMinutes && currentMinutes < closeMinutes;\n\nif (typeof body.forceOpen === 'boolean') {\n  isOpen = body.forceOpen;\n}\n\nreturn [{\n  json: {\n    ...input,\n    ...body,\n    isOpen,\n    opening_hours: 'Montag bis Freitag von 09:00 bis 18:00 Uhr. Samstag und Sonntag geschlossen.',\n    closed_message: 'Vielen Dank für Ihre Nachricht. Wir haben aktuell geschlossen. Unsere Öffnungszeiten sind Montag bis Freitag von 09:00 bis 18:00 Uhr. Bitte kontaktieren Sie uns während der Öffnungszeiten erneut.'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -272,
+        352
+      ],
+      "name": "Check Opening Hours",
+      "id": "80ed03e8-4047-5b08-8073-b176c5bcb04d"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "is-open-true",
+                    "leftValue": "={{$json[\"isOpen\"]}}",
+                    "rightValue": true,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "is-open-false",
+                    "leftValue": "={{$json[\"isOpen\"]}}",
+                    "rightValue": false,
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "false",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        352
+      ],
+      "name": "Open?",
+      "id": "7a534bce-4604-5dd5-9501-35e82d9be8f8"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": {{$json.closed_message.toJsonString()}},\n  \"status\": \"closed\",\n  \"opening_hours\": {{$json.opening_hours.toJsonString()}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -32,
+        640
+      ],
+      "name": "Closed Response",
+      "id": "95e2af7b-5718-5194-875a-3a03e1628ad3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst now = new Date();\nconst parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {\n  timeZone: 'Europe/Berlin', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'\n}).formatToParts(now).map(part => [part.type, part.value]));\nreturn [{json: {...input, current_datetime_utc: now.toISOString(),\n  current_day: {Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[parts.weekday],\n  current_hour: Number(parts.hour), current_minute: Number(parts.minute),\n  current_minutes: Number(parts.hour) * 60 + Number(parts.minute), timezone: 'Europe/Berlin'\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -528,
+        352
+      ],
+      "name": "Date & Time Berlin",
+      "id": "a00d0089-6746-53cc-a0d4-b95e7e06a89f"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Date & Time Berlin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time Berlin": {
+      "main": [
+        [
+          {
+            "node": "Check Opening Hours",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Opening Hours": {
+      "main": [
+        [
+          {
+            "node": "Open?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Open?": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Closed Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Parse AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Technik Routing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "termin",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "bewerbung",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "vertrieb",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "support",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technik Routing": {
+      "main": [
+        [
+          {
+            "node": "technik",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "termin": {
+      "main": [
+        [
+          {
+            "node": "termin1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "bewerbung": {
+      "main": [
+        [
+          {
+            "node": "bewerbung1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "vertrieb": {
+      "main": [
+        [
+          {
+            "node": "vertrieb1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "support": {
+      "main": [
+        [
+          {
+            "node": "support2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Closed Response": {
+      "main": [
+        []
+      ]
+    },
+    "technik": {
+      "main": [
+        []
+      ]
+    },
+    "termin1": {
+      "main": [
+        []
+      ]
+    },
+    "bewerbung1": {
+      "main": [
+        []
+      ]
+    },
+    "vertrieb1": {
+      "main": [
+        []
+      ]
+    },
+    "support2": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  },
+  "active": false,
+  "pinData": {}
+}
