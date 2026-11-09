@@ -71,13 +71,7 @@ Beispielantwort während der Geschäftszeiten bei Zuordnung zur Technik:
 
 ### Geschäftszeiten gezielt testen
 
-Der vorhandene Testschalter `forceOpen` kann in einer lokalen Testkopie die Zeitprüfung überschreiben:
-
-```json
-{"transcript":"Ich möchte einen Termin vereinbaren.","forceOpen":true}
-```
-
-Mit `false` wird der geschlossene Zweig ohne OpenAI-Aufruf getestet. Mit `true` wird die KI-Analyse ausgeführt und API-Nutzung abgerechnet. Für einen extern erreichbaren Betrieb den Testschalter entfernen und die Webhook-Authentifizierung in n8n konfigurieren.
+`npm test` prüft beide Zweige mit festen Berliner Uhrzeiten. Im n8n-Testmodus entscheidet die aktuelle Berliner Uhrzeit. Die Anfrage übergibt den Text unter `transcript`. Außerhalb der Öffnungszeiten antwortet der Workflow ohne OpenAI-Aufruf. Für einen extern erreichbaren Betrieb richte die Webhook-Authentifizierung in n8n ein.
 
 ## Tests
 

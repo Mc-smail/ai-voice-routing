@@ -65,17 +65,33 @@ for (const [label, current_day, current_minutes, expected] of [
   });
 }
 
-for (const forceOpen of [true, false]) {
-  test(`explicit test override forceOpen=${forceOpen}`, async () => {
+for (const expected of [true, false]) {
+  test(`webhook fields cannot override the server opening decision (${expected})`, async () => {
+    const current_day = expected ? 1 : 0;
     const result = await execute('Check Opening Hours', {
-      current_day: forceOpen ? 0 : 1,
-      current_minutes: forceOpen ? 0 : 600,
-      body: { forceOpen, transcript: 'Synthetic request' },
+      current_day,
+      current_minutes: 600,
+      body: {
+        forceOpen: !expected,
+        isOpen: !expected,
+        current_day: expected ? 0 : 1,
+        current_minutes: 0,
+        transcript: 'Synthetic request',
+      },
     });
-    assert.equal(result.isOpen, forceOpen);
+    assert.equal(result.isOpen, expected);
+    assert.equal(result.current_day, current_day);
+    assert.equal(result.current_minutes, 600);
     assert.equal(result.transcript, 'Synthetic request');
   });
 }
+
+test('opening hours preserves a top-level transcript when the body has none', async () => {
+  const result = await execute('Check Opening Hours', {
+    current_day: 1, current_minutes: 600, transcript: 'Synthetic request', body: {},
+  });
+  assert.equal(result.transcript, 'Synthetic request');
+});
 
 for (const [label, timestamp, expectedHour, expectedDay] of [
   ['winter UTC+1', '2026-01-12T08:30:00.000Z', 9, 1],
