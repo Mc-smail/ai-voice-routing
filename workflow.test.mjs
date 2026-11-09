@@ -155,3 +155,17 @@ test('all five switch branches and response payloads agree with their routing as
   }
   assert.deepEqual([...departments].sort(), ['bewerbung', 'support', 'technik', 'termin', 'vertrieb']);
 });
+
+
+test('JSON recovery ignores unrelated trailing objects and braces inside quoted values', async () => {
+  const result = {...aiObject, anliegen: 'Text with {braces} and "quotes"'};
+  const text = 'Ergebnis: ' + JSON.stringify(result) + ' Zusatz: {"info":"kein Routing"}';
+  const parsed = await execute('Parse AI JSON', {text});
+  assert.equal(parsed.kategorie, 'vertrieb');
+  assert.equal(parsed.anliegen, result.anliegen);
+});
+
+test('two distinct routing objects are ambiguous and fall back to support', async () => {
+  const text = JSON.stringify(aiObject) + '\n' + JSON.stringify({...aiObject, kategorie:'technik'});
+  assert.equal((await execute('Parse AI JSON', {text})).kategorie, 'support');
+});
