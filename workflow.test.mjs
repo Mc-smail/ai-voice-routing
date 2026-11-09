@@ -159,6 +159,28 @@ for (const [label, input] of [
   });
 }
 
+test('model output is normalized to the four supported routing fields', async () => {
+  const text = JSON.stringify({
+    kategorie: ' VERTRIEB ',
+    anliegen: '  ' + '😀'.repeat(501) + '  ',
+    prioritaet: ' HOCH ',
+    aktion: 'unbekannt',
+    transfer_target: 'unbekanntes_ziel',
+  });
+  const parsed = await execute('Parse AI JSON', {text, provider_metadata: {id: 'fake'}});
+  assert.deepEqual(parsed, {
+    kategorie: 'vertrieb', anliegen: '😀'.repeat(500), prioritaet: 'hoch', aktion: 'weiterleiten',
+  });
+});
+
+test('invalid types and missing routing values receive predictable defaults', async () => {
+  const expected = {kategorie: 'support', anliegen: '', prioritaet: 'mittel', aktion: 'weiterleiten'};
+  assert.deepEqual(await execute('Parse AI JSON', {text: '{}'}), expected);
+  assert.deepEqual(await execute('Parse AI JSON', {
+    text: JSON.stringify({kategorie: ['vertrieb'], anliegen: {text: 'test'}, prioritaet: 'sofort'}),
+  }), expected);
+});
+
 for (const input of [{ text: 'broken { invalid JSON' }, { text: 'null' }, { text: '[]' }, { text: '{"kategorie":"unknown"}' }]) {
   test(`malformed or unsupported AI answer falls back to support: ${JSON.stringify(input)}`, async () => {
     assert.equal((await execute('Parse AI JSON', input)).kategorie, 'support');

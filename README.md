@@ -14,7 +14,7 @@ flowchart TD
     B --> C{"Mo–Fr, 09:00 bis vor 18:00?"}
     C -->|Nein| D["JSON-Antwort: geschlossen"]
     C -->|Ja| E["OpenAI analysiert den Text"]
-    E --> F["JSON lesen und Kategorie prüfen"]
+    E --> F["JSON lesen und Routing-Felder prüfen"]
     F --> G{"Abteilung auswählen"}
     G --> H["Technik"]
     G --> I["Termin / Empfang"]
@@ -37,7 +37,8 @@ flowchart TD
 | KI-Analyse | OpenAI-Knoten, im Export mit `gpt-4o-mini` konfiguriert |
 | Routing | Technik, Termin, Bewerbung, Vertrieb oder Support |
 | Entscheidungslogik | Eindeutige Schlüsselwörter haben Vorrang vor der KI-Kategorie; Reihenfolge: Termin, Technik, Bewerbung, Vertrieb |
-| JSON-Verarbeitung | Liest Modellantworten, Codeblöcke und JSON mit Vorrede; unbrauchbare Kategorien fallen auf Support zurück |
+| JSON-Verarbeitung | Liest Modellantworten, Codeblöcke und JSON mit Vorrede und gibt geprüfte Routing-Felder weiter |
+| Standardwerte | Unbekannte Kategorien fallen auf Support zurück. Unbekannte Priorität wird zu `mittel`. Das Anliegen umfasst bis zu 500 Unicode-Codepunkte. Die interne Aktion ist `weiterleiten`. |
 | Ergebnis | Strukturierte Webhook-Antwort mit Abteilung, Team und logischem Ziel |
 
 Bewerbungsbegriffe werden an Unicode-Wortgrenzen erkannt. So bleibt „Ihre Rechnung“ beim Support, während „HR-Abteilung“ zur Bewerbung gehört; „bestellen“ wird dem Vertrieb zugeordnet. Die Reihenfolge der Routing-Zweige bleibt bestehen.
