@@ -91,7 +91,7 @@ Die OpenAPI-Beschreibung enthält die Anfrage und Beispiele für die Antworten m
 
 ### Geschäftszeiten gezielt testen
 
-`npm test` prüft beide Zweige mit festen Berliner Uhrzeiten. Im n8n-Testmodus entscheidet die aktuelle Berliner Uhrzeit. Die Anfrage übergibt den Text unter `transcript`. Außerhalb der Öffnungszeiten antwortet der Workflow ohne OpenAI-Aufruf. Für einen extern erreichbaren Betrieb richte die Webhook-Authentifizierung in n8n ein.
+`npm test` prüft beide Zweige mit festen Berliner Uhrzeiten. Im n8n-Testmodus entscheidet die aktuelle Berliner Uhrzeit. Die Anfrage übergibt den Text unter `transcript`. Außerhalb der Öffnungszeiten antwortet der Workflow ohne OpenAI-Aufruf. Für die Anbindung eines externen Dienstes findest du Einrichtung und Datenfluss in der [Betriebsanleitung](docs/betrieb.md).
 
 ## Tests
 
@@ -108,6 +108,7 @@ Die Tests prüfen die exportierten Code-Knoten mit synthetischen Daten: Verbindu
 | Datei | Inhalt |
 | --- | --- |
 | [`workflows/ai-voice-routing.json`](workflows/ai-voice-routing.json) | Bereinigter, importierbarer n8n-Workflow |
+| [`docs/betrieb.md`](docs/betrieb.md) | Webhook-Zugriff, Datenfluss, Kosten und Grenzen |
 | [`docs/webhook.openapi.json`](docs/webhook.openapi.json) | HTTP-Vertrag mit Anfrage- und Antwortbeispielen |
 | [`scripts/demo.mjs`](scripts/demo.mjs) | Lokale Demo mit Beispielanfragen |
 | [`workflow.test.mjs`](workflow.test.mjs) | Automatisierte Tests der exportierten Logik |
