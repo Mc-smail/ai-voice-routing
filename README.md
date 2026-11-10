@@ -101,7 +101,7 @@ Voraussetzung: Node.js ab Version 22. Es werden keine npm-Pakete und keine API-S
 npm test
 ```
 
-Die Tests prüfen die exportierten Code-Knoten mit synthetischen Daten: Verbindungen, Geschäftszeitgrenzen, Sommer-/Winterzeit, JSON-Verarbeitung, Kategorien und Abteilungsantworten. GitHub Actions führt dieselben Tests auf Node.js 22 und 24 aus. Ein echter OpenAI-Aufruf, ein laufender n8n-Server oder ein Telefonanruf wird dabei nicht simuliert oder als bestanden behauptet.
+Die Tests prüfen die exportierten Code-Knoten mit synthetischen Daten: Verbindungen, Geschäftszeitgrenzen, Sommer-/Winterzeit, JSON-Verarbeitung, Kategorien und Abteilungsantworten. GitHub Actions führt die Tests auf Node.js 22 und 24 jeweils mit den Serverzeitzonen `Europe/Berlin` und `America/Los_Angeles` aus. Die erwarteten Berliner Geschäftszeiten gelten in beiden Fällen. Ein echter OpenAI-Aufruf, ein laufender n8n-Server oder ein Telefonanruf wird dabei nicht simuliert oder als bestanden behauptet.
 
 ## Dateien und Daten
 
