@@ -1,24 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { AsyncFunction, execute, nodes, workflow } from './scripts/workflow-code.mjs';
 
-const workflow = JSON.parse(await readFile(new URL('./workflows/ai-voice-routing.json', import.meta.url), 'utf8'));
-const nodes = new Map(workflow.nodes.map(node => [node.name, node]));
-const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
-
-// Only synthetic node inputs are supplied. No n8n instance or external API is used.
-async function execute(name, input = {}, transcript = '', DateClass = Date) {
-  const source = nodes.get(name)?.parameters.jsCode;
-  assert.equal(typeof source, 'string', `${name} must contain JavaScript`);
-  const run = new AsyncFunction('$input', '$node', 'Date', source);
-  const result = await run(
-    { first: () => ({ json: input }) },
-    { Webhook: { json: { body: { transcript } } } },
-    DateClass,
-  );
-  assert.equal(result.length, 1);
-  return result[0].json;
-}
+test('offline demo runs the documented examples with predictable outcomes', () => {
+  const demo = fileURLToPath(new URL('./scripts/demo.mjs', import.meta.url));
+  const cases = JSON.parse(execFileSync(process.execPath, [demo], {encoding: 'utf8'}));
+  assert.deepEqual(cases.map(({statusCode, body}) => [statusCode, body.department ?? body.status]), [
+    [200, 'technik'], [200, 'vertrieb'], [200, 'closed'], [400, 'invalid_request'],
+  ]);
+});
 
 test('export has unique nodes and connections refer to existing nodes', () => {
   assert.equal(nodes.size, workflow.nodes.length);

@@ -4,7 +4,8 @@
   "private": true,
   "description": "n8n prototype for AI-assisted customer request routing",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "demo": "node scripts/demo.mjs"
   },
   "engines": {
     "node": ">=22"

@@ -46,6 +46,16 @@ Bewerbungsbegriffe werden an Unicode-Wortgrenzen erkannt. So bleibt „Ihre Rech
 
 Der Export enthält **18 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
 
+## Lokal ausprobieren
+
+Mit Node.js ab Version 22 kannst du die Routing-Logik direkt ausprobieren.
+
+```bash
+npm run demo
+```
+
+Vier Beispielanfragen zeigen Technik und Vertrieb, die Antwort außerhalb der Öffnungszeiten und den Fehler bei einem leeren Transkript. Die Demo führt die JavaScript-Knoten aus dem Workflow-Export mit festen Uhrzeiten und vorbereiteten Modellantworten aus. Sie benötigt nur Node.js und npm.
+
 ## In n8n starten
 
 1. Importiere [`workflows/ai-voice-routing.json`](workflows/ai-voice-routing.json) über **Import from File** in deine n8n-Instanz.
@@ -99,6 +109,7 @@ Die Tests prüfen die exportierten Code-Knoten mit synthetischen Daten: Verbindu
 | --- | --- |
 | [`workflows/ai-voice-routing.json`](workflows/ai-voice-routing.json) | Bereinigter, importierbarer n8n-Workflow |
 | [`docs/webhook.openapi.json`](docs/webhook.openapi.json) | HTTP-Vertrag mit Anfrage- und Antwortbeispielen |
+| [`scripts/demo.mjs`](scripts/demo.mjs) | Lokale Demo mit Beispielanfragen |
 | [`workflow.test.mjs`](workflow.test.mjs) | Automatisierte Tests der exportierten Logik |
 | [`.github/workflows/tests.yml`](.github/workflows/tests.yml) | Automatische GitHub-Prüfung |
 
