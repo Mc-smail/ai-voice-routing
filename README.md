@@ -77,6 +77,8 @@ Eine ungültige Eingabe erhält **HTTP 400** mit `status: invalid_request` und e
 
 Meldet der OpenAI-Knoten einen API-Fehler oder eine Zeitüberschreitung, antwortet der Webhook mit **HTTP 502**, `status: model_unavailable` und einem Hinweis für einen späteren Versuch. Die Antwort enthält einen festen Meldungstext.
 
+Die OpenAPI-Beschreibung enthält die Anfrage und Beispiele für die Antworten mit HTTP 200, 400 und 502. Bei HTTP 200 zeigt `status: closed` an, dass der Support geschlossen ist. [Webhook-Schnittstelle](docs/webhook.openapi.json)
+
 ### Geschäftszeiten gezielt testen
 
 `npm test` prüft beide Zweige mit festen Berliner Uhrzeiten. Im n8n-Testmodus entscheidet die aktuelle Berliner Uhrzeit. Die Anfrage übergibt den Text unter `transcript`. Außerhalb der Öffnungszeiten antwortet der Workflow ohne OpenAI-Aufruf. Für einen extern erreichbaren Betrieb richte die Webhook-Authentifizierung in n8n ein.
@@ -96,6 +98,7 @@ Die Tests prüfen die exportierten Code-Knoten mit synthetischen Daten: Verbindu
 | Datei | Inhalt |
 | --- | --- |
 | [`workflows/ai-voice-routing.json`](workflows/ai-voice-routing.json) | Bereinigter, importierbarer n8n-Workflow |
+| [`docs/webhook.openapi.json`](docs/webhook.openapi.json) | HTTP-Vertrag mit Anfrage- und Antwortbeispielen |
 | [`workflow.test.mjs`](workflow.test.mjs) | Automatisierte Tests der exportierten Logik |
 | [`.github/workflows/tests.yml`](.github/workflows/tests.yml) | Automatische GitHub-Prüfung |
 

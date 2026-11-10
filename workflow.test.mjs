@@ -260,6 +260,31 @@ test('all five routing branches send their configured fields through a shared re
   assert.equal(render({agent_name: 'Geändertes Team'}).agent_name, 'Geändertes Team');
 });
 
+test('OpenAPI examples match the exported webhook and response data', async () => {
+  const spec = JSON.parse(await readFile(new URL('./docs/webhook.openapi.json', import.meta.url), 'utf8'));
+  const path = '/' + nodes.get('Webhook').parameters.path;
+  const operation = spec.paths[path].post;
+  const request = operation.requestBody.content['application/json'].examples.routerIssue.value;
+  assert.equal((await execute('Validate Transcript', {body: request})).validTranscript, true);
+  const route = await execute('Parse AI JSON', {}, request.transcript);
+  const routingFields = Object.fromEntries(nodes.get('Technik Routing').parameters.assignments.assignments
+    .map(({name, value}) => [name, value]));
+  const success = operation.responses['200'].content['application/json'].examples;
+  assert.equal(route.kategorie, success.routed.value.department);
+  assert.deepEqual(routingFields, success.routed.value);
+
+  const afterHours = await execute('Check Opening Hours', {current_day: 1, current_minutes: 1080});
+  assert.equal(afterHours.isOpen, false);
+  assert.deepEqual(success.closed.value, {
+    status: 'closed', message: afterHours.closed_message, opening_hours: afterHours.opening_hours,
+  });
+  for (const name of ['Invalid Transcript', 'Model Unavailable']) {
+    const {options, responseBody} = nodes.get(name).parameters;
+    const documented = operation.responses[options.responseCode].content['application/json'].examples.error.value;
+    assert.deepEqual(documented, JSON.parse(responseBody));
+  }
+});
+
 test('JSON recovery ignores unrelated trailing objects and braces inside quoted values', async () => {
   const result = {...aiObject, anliegen: 'Text with {braces} and "quotes"'};
   const text = 'Ergebnis: ' + JSON.stringify(result) + ' Zusatz: {"info":"kein Routing"}';

@@ -1,0 +1,206 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AI Voice Routing Webhook",
+    "version": "1.0.0",
+    "description": "Schnittstelle zur Abteilungszuordnung mit Geschäftszeiten in Europe/Berlin."
+  },
+  "servers": [
+    {
+      "url": "{webhookBase}",
+      "variables": {
+        "webhookBase": {
+          "default": "http://localhost:5678/webhook-test",
+          "description": "Kopiere aus der in n8n angezeigten URL den gesamten Teil vor /vapi-router. Dazu gehören auch mögliche Präfixe mit der Workflow-ID."
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/vapi-router": {
+      "post": {
+        "operationId": "routeCustomerTranscript",
+        "summary": "Ein Kundentranskript einer Abteilung zuordnen",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "transcript"
+                ],
+                "properties": {
+                  "transcript": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 8000,
+                    "pattern": "\\S",
+                    "description": "Transkribierte Kundenanfrage mit mindestens einem Zeichen außerhalb von Leerraum. Der Workflow begrenzt die Länge zusätzlich auf 8000 UTF-16-Codeeinheiten."
+                  }
+                }
+              },
+              "examples": {
+                "routerIssue": {
+                  "value": {
+                    "transcript": "Mein Router funktioniert nicht."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Abteilungszuordnung während der Öffnungszeiten oder Hinweis bei geschlossenem Support.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "message",
+                        "department",
+                        "agent_name",
+                        "transfer_target"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "department": {
+                          "type": "string",
+                          "enum": [
+                            "technik",
+                            "termin",
+                            "bewerbung",
+                            "vertrieb",
+                            "support"
+                          ]
+                        },
+                        "agent_name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "transfer_target": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "message",
+                        "status",
+                        "opening_hours"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "status": {
+                          "const": "closed"
+                        },
+                        "opening_hours": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "examples": {
+                  "routed": {
+                    "value": {
+                      "message": "Ich verbinde Sie jetzt mit dem Technik Team.",
+                      "department": "technik",
+                      "agent_name": "Technik Team",
+                      "transfer_target": "technik_agent"
+                    }
+                  },
+                  "closed": {
+                    "value": {
+                      "message": "Vielen Dank für Ihre Nachricht. Wir haben aktuell geschlossen. Unsere Öffnungszeiten sind Montag bis Freitag von 09:00 bis 18:00 Uhr. Bitte kontaktieren Sie uns während der Öffnungszeiten erneut.",
+                      "status": "closed",
+                      "opening_hours": "Montag bis Freitag von 09:00 bis 18:00 Uhr. Samstag und Sonntag geschlossen."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Das JSON enthält kein gültiges Transkript. Bei syntaktisch ungültigem JSON kann n8n bereits vor dem Workflow eine eigene Fehlermeldung ausgeben.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "const": "invalid_request"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "examples": {
+                  "error": {
+                    "value": {
+                      "status": "invalid_request",
+                      "message": "transcript muss ein nicht leerer Text mit höchstens 8000 UTF-16-Codeeinheiten sein."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Der Modellknoten meldet einen API-Fehler oder eine Zeitüberschreitung.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "status",
+                    "message"
+                  ],
+                  "additionalProperties": false,
+                  "properties": {
+                    "status": {
+                      "const": "model_unavailable"
+                    },
+                    "message": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                },
+                "examples": {
+                  "error": {
+                    "value": {
+                      "status": "model_unavailable",
+                      "message": "Die automatische Zuordnung ist gerade nicht verfügbar. Bitte versuchen Sie es später erneut."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
