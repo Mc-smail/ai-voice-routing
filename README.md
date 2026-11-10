@@ -35,7 +35,7 @@ flowchart TD
 | --- | --- |
 | Eingang | POST-Webhook mit nicht leerem `transcript` im JSON-Body, maximal 8000 UTF-16-Codeeinheiten |
 | Geschäftszeiten | Montag bis Freitag, 09:00 bis vor 18:00 Uhr; Zeitzone Europe/Berlin mit Sommerzeit |
-| KI-Analyse | OpenAI-Knoten, im Export mit `gpt-4o-mini` konfiguriert |
+| KI-Analyse | Der OpenAI-Knoten nutzt `gpt-4o-mini`. Feste Anweisungen beschreiben Kategorien und Ausgabeformat. Das Transkript wird als separate Benutzernachricht übergeben. |
 | Routing | Technik, Termin, Bewerbung, Vertrieb oder Support |
 | Entscheidungslogik | Eindeutige Schlüsselwörter haben Vorrang vor der KI-Kategorie; Reihenfolge: Termin, Technik, Bewerbung, Vertrieb |
 | JSON-Verarbeitung | Liest Modellantworten, Codeblöcke und JSON mit Vorrede und gibt geprüfte Routing-Felder weiter |

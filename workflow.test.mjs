@@ -79,6 +79,16 @@ test('webhook validates transcript before the opening hours and model branches',
   assert.equal((await execute('Validate Transcript', {transcript: 'Direkte Eingabe'})).validTranscript, true);
 });
 
+test('model instructions stay static while the transcript goes to the user message', () => {
+  const {options, responses} = nodes.get('Message a model').parameters;
+  assert.equal(typeof options.instructions, 'string');
+  assert.doesNotMatch(options.instructions, /\{\{|^=/);
+  assert.match(options.instructions, /gültigen JSON-Objekt/);
+  assert.deepEqual(responses.values, [
+    {type: 'text', role: 'user', content: '={{ $json.transcript }}'},
+  ]);
+});
+
 test('model failures get a terminal JSON 502 response', () => {
   const model = nodes.get('Message a model');
   assert.equal(model.onError, 'continueErrorOutput');
