@@ -22,7 +22,7 @@ flowchart TD
     G --> J["Bewerbung / HR"]
     G --> K["Vertrieb"]
     G --> L["Support"]
-    H --> M["JSON mit message, department, agent_name, transfer_target"]
+    H --> M["Gemeinsame JSON-Antwort aus den Routing-Feldern"]
     I --> M
     J --> M
     K --> M
@@ -40,11 +40,11 @@ flowchart TD
 | Entscheidungslogik | Eindeutige Schlüsselwörter haben Vorrang vor der KI-Kategorie; Reihenfolge: Termin, Technik, Bewerbung, Vertrieb |
 | JSON-Verarbeitung | Liest Modellantworten, Codeblöcke und JSON mit Vorrede und gibt geprüfte Routing-Felder weiter |
 | Standardwerte | Unbekannte Kategorien fallen auf Support zurück. Unbekannte Priorität wird zu `mittel`. Das Anliegen umfasst bis zu 500 Unicode-Codepunkte. Die interne Aktion ist `weiterleiten`. |
-| Ergebnis | Strukturierte Webhook-Antwort mit Abteilung, Team und logischem Ziel |
+| Ergebnis | Eine gemeinsame Webhook-Antwort übernimmt Meldung, Abteilung, Team und Ziel aus dem gewählten Routing-Knoten |
 
 Bewerbungsbegriffe werden an Unicode-Wortgrenzen erkannt. So bleibt „Ihre Rechnung“ beim Support, während „HR-Abteilung“ zur Bewerbung gehört; „bestellen“ wird dem Vertrieb zugeordnet. Die Reihenfolge der Routing-Zweige bleibt bestehen.
 
-Der Export enthält **22 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
+Der Export enthält **18 Knoten**. Die Antworten liefern Ziele wie `technik_agent`. Ein externer Telefoniedienst muss diese Ziele auf echte Agenten oder Telefonnummern abbilden. Ein tatsächlicher Telefontransfer, CRM-Anbindung und produktiver Telefoniebetrieb sind Erweiterungen. Vapi, Deepgram, ElevenLabs und Twilio werden als mögliche Integrationskomponenten betrachtet; ihre Kontokonfigurationen sind nicht Bestandteil dieses Repositories.
 
 ## In n8n starten
 

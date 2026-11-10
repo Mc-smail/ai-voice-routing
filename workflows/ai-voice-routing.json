@@ -201,6 +201,12 @@
               "name": "transfer_target",
               "value": "technik_agent",
               "type": "string"
+            },
+            {
+              "id": "f3c06480-9947-4390-bf51-4555d918f1bf",
+              "name": "message",
+              "value": "Ich verbinde Sie jetzt mit dem Technik Team.",
+              "type": "string"
             }
           ]
         },
@@ -228,13 +234,19 @@
             {
               "id": "992b55ef-d44c-4b95-a109-066e96222da2",
               "name": "agent_name",
-              "value": "empfang",
+              "value": "Empfang",
               "type": "string"
             },
             {
               "id": "f1ca0fcf-6816-4e11-a5cb-c7ec4feb2d2b",
               "name": "transfer_target",
               "value": "empfang_agent",
+              "type": "string"
+            },
+            {
+              "id": "f5835bb7-fcea-4ba4-8347-9680204bb6b6",
+              "name": "message",
+              "value": "Ich verbinde Sie jetzt mit unserem Empfang.",
               "type": "string"
             }
           ]
@@ -271,6 +283,12 @@
               "name": "transfer_target",
               "value": "hr_agent",
               "type": "string"
+            },
+            {
+              "id": "0ab20567-c785-4046-9b61-a49823e36904",
+              "name": "message",
+              "value": "Ich verbinde Sie jetzt mit unserem HR Team.",
+              "type": "string"
             }
           ]
         },
@@ -306,6 +324,12 @@
               "name": "transfer_target",
               "value": "sales_agent",
               "type": "string"
+            },
+            {
+              "id": "8c6ec713-9151-4cf0-838b-fbdcb80002a4",
+              "name": "message",
+              "value": "Ich verbinde Sie jetzt mit dem Sales Team.",
+              "type": "string"
             }
           ]
         },
@@ -333,13 +357,19 @@
             {
               "id": "5a4fd719-a26a-48cd-8909-1010c4f85144",
               "name": "agent_name",
-              "value": "support Team",
+              "value": "Support Team",
               "type": "string"
             },
             {
               "id": "aa0c6fcf-d4ba-4d60-87b4-5abf2169b5c9",
               "name": "transfer_target",
               "value": "support_agent",
+              "type": "string"
+            },
+            {
+              "id": "6c2a7fb1-3d68-48e9-be1b-8a4de7b08f21",
+              "name": "message",
+              "value": "Ich verbinde Sie jetzt mit dem Support Team.",
               "type": "string"
             }
           ]
@@ -358,76 +388,16 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit unserem HR Team.\",\n  \"department\": \"bewerbung\",\n  \"agent_name\": \"HR Team\",\n  \"transfer_target\": \"hr_agent\"\n}",
+        "responseBody": "={{ ({ message: $json.message, department: $json.department, agent_name: $json.agent_name, transfer_target: $json.transfer_target }) }}",
         "options": {}
       },
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
         1744,
-        960
+        384
       ],
-      "name": "bewerbung1",
-      "id": "6c5e923b-3260-5d23-8d60-a76aa673f9a9"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit unserem Empfang.\",\n  \"department\": \"termin\",\n  \"agent_name\": \"Empfang\",\n  \"transfer_target\": \"empfang_agent\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
-      "position": [
-        1744,
-        688
-      ],
-      "name": "termin1",
-      "id": "c9f97d96-630b-5f7a-87d5-1556fd0b755b"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit dem Support Team.\",\n  \"department\": \"support\",\n  \"agent_name\": \"Support Team\",\n  \"transfer_target\": \"support_agent\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
-      "position": [
-        1744,
-        464
-      ],
-      "name": "support2",
-      "id": "23d4f7c6-b036-57d9-9d45-299b0e3ef0ac"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit dem Sales Team.\",\n  \"department\": \"vertrieb\",\n  \"agent_name\": \"Sales Team\",\n  \"transfer_target\": \"sales_agent\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
-      "position": [
-        1744,
-        176
-      ],
-      "name": "vertrieb1",
-      "id": "4604e69e-42d4-5d18-b5e6-cd8721f1da1f"
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={\n  \"message\": \"Ich verbinde Sie jetzt mit dem Technik Team.\",\n  \"department\": \"technik\",\n  \"agent_name\": \"Technik Team\",\n  \"transfer_target\": \"technik_agent\"\n}",
-        "options": {}
-      },
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.5,
-      "position": [
-        1744,
-        -160
-      ],
-      "name": "technik",
+      "name": "Routing Response",
       "id": "402a64f2-c30e-5711-a36b-9bc6a622008e"
     },
     {
@@ -782,7 +752,7 @@
       "main": [
         [
           {
-            "node": "technik",
+            "node": "Routing Response",
             "type": "main",
             "index": 0
           }
@@ -793,7 +763,7 @@
       "main": [
         [
           {
-            "node": "termin1",
+            "node": "Routing Response",
             "type": "main",
             "index": 0
           }
@@ -804,7 +774,7 @@
       "main": [
         [
           {
-            "node": "bewerbung1",
+            "node": "Routing Response",
             "type": "main",
             "index": 0
           }
@@ -815,7 +785,7 @@
       "main": [
         [
           {
-            "node": "vertrieb1",
+            "node": "Routing Response",
             "type": "main",
             "index": 0
           }
@@ -826,7 +796,7 @@
       "main": [
         [
           {
-            "node": "support2",
+            "node": "Routing Response",
             "type": "main",
             "index": 0
           }
@@ -834,31 +804,6 @@
       ]
     },
     "Closed Response": {
-      "main": [
-        []
-      ]
-    },
-    "technik": {
-      "main": [
-        []
-      ]
-    },
-    "termin1": {
-      "main": [
-        []
-      ]
-    },
-    "bewerbung1": {
-      "main": [
-        []
-      ]
-    },
-    "vertrieb1": {
-      "main": [
-        []
-      ]
-    },
-    "support2": {
       "main": [
         []
       ]

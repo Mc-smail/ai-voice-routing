@@ -228,33 +228,37 @@ for (const [transcript, expected] of [
   });
 }
 
-test('all five switch branches and response payloads agree with their routing assignments', () => {
-  const switchNode = nodes.get('Switch');
+test('all five routing branches send their configured fields through a shared response', () => {
+  const response = nodes.get('Routing Response');
+  assert.equal(response.type, 'n8n-nodes-base.respondToWebhook');
+  assert.equal(response.parameters.respondWith, 'json');
+  const expression = response.parameters.responseBody;
+  assert.ok(expression.startsWith('={{') && expression.endsWith('}}'));
+  const render = new Function('$json', 'return (' + expression.slice(3, -2) + ');');
+  const expectedRoutes = {
+    technik: ['Technik Team', 'technik_agent', 'Ich verbinde Sie jetzt mit dem Technik Team.'],
+    termin: ['Empfang', 'empfang_agent', 'Ich verbinde Sie jetzt mit unserem Empfang.'],
+    bewerbung: ['HR Team', 'hr_agent', 'Ich verbinde Sie jetzt mit unserem HR Team.'],
+    vertrieb: ['Sales Team', 'sales_agent', 'Ich verbinde Sie jetzt mit dem Sales Team.'],
+    support: ['Support Team', 'support_agent', 'Ich verbinde Sie jetzt mit dem Support Team.'],
+  };
   const branches = workflow.connections.Switch.main;
-  assert.equal(branches.length, 5);
-  const departments = new Set();
+  const rules = nodes.get('Switch').parameters.rules.values;
+  const categories = [];
   for (let index = 0; index < branches.length; index++) {
-    const category = switchNode.parameters.rules.values[index].conditions.conditions[0].rightValue;
-    departments.add(category);
+    const category = rules[index].conditions.conditions[0].rightValue;
+    categories.push(category);
+    const [agent_name, transfer_target, message] = expectedRoutes[category];
     assert.equal(branches[index].length, 1);
-    const routing = nodes.get(branches[index][0].node);
-    const assignments = Object.fromEntries(routing.parameters.assignments.assignments.map(item => [item.name, item.value]));
-    assert.equal(assignments.department, category);
-    const responseEdges = workflow.connections[routing.name].main[0];
-    assert.equal(responseEdges.length, 1);
-    const response = nodes.get(responseEdges[0].node);
-    assert.equal(response.type, 'n8n-nodes-base.respondToWebhook');
-    assert.equal(response.parameters.respondWith, 'json');
-    const payload = JSON.parse(response.parameters.responseBody.replace(/^=/, ''));
-    assert.equal(payload.department, assignments.department);
-    assert.equal(payload.transfer_target, assignments.transfer_target);
-    assert.equal(payload.agent_name.toLowerCase(), assignments.agent_name.toLowerCase());
-    assert.equal(typeof payload.message, 'string');
-    assert.ok(payload.message.length > 0);
+    const route = nodes.get(branches[index][0].node);
+    assert.deepEqual(workflow.connections[route.name].main[0].map(edge => edge.node), [response.name]);
+    const assignments = Object.fromEntries(route.parameters.assignments.assignments.map(item => [item.name, item.value]));
+    assert.deepEqual(render({...assignments, extra: 'internal only'}),
+      {message, department: category, agent_name, transfer_target});
   }
-  assert.deepEqual([...departments].sort(), ['bewerbung', 'support', 'technik', 'termin', 'vertrieb']);
+  assert.deepEqual(categories.sort(), Object.keys(expectedRoutes).sort());
+  assert.equal(render({agent_name: 'Geändertes Team'}).agent_name, 'Geändertes Team');
 });
-
 
 test('JSON recovery ignores unrelated trailing objects and braces inside quoted values', async () => {
   const result = {...aiObject, anliegen: 'Text with {braces} and "quotes"'};
